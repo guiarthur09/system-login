@@ -8,4 +8,5 @@ Reviewing Python concepts and applying **back-end** practices.
 - Add database -> **SQLite3/MySQL**
 - Password encryption (hash) -> **SHA256/MD5**
 - Account locked after incorrect attempts
+- Deploy -> **Docker**
 
