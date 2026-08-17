@@ -66,3 +66,10 @@ while True:
 
     if opc == 1:
         sing_up()
+    #if opc = 2:
+        #login() -> Still to be done
+    elif opc == 3:
+        print("Bye")
+        break
+    else:
+        print("Invalid Option! Try again")
