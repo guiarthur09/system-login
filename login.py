@@ -1,52 +1,68 @@
+from email_validator import validate_email, EmailNotValidError
+from datetime import datetime
+import sqlite3
+import bcrypt
 import getpass
 
-account = {
-    "user": "Guilherme",
-    "password": "Gui171609"
-}
+connection = sqlite3.connect("database/data.db")
+cursor = connection.cursor()
 
-number_attempts = 3
+#[Date Created]
+now = datetime.now()
+readable_string = now.strftime("%Y-%m-%d %H:%M")
 
-print("\n===== SYSTEM ACCOUNT ====\n")
-print("[1] Login")
-print("[2] Exit")
-opc = int(input("Which one do you want? R: "))
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    status_account TEXT DEFAULT 'active' CHECK(status_account IN ('active', 'inactive'))
+);
+""")
 
-if opc == 1:
+connection.commit()
 
-    while number_attempts < 4:
-        user = input("Enter your username: ").strip()
-        password = getpass.getpass("Enter your password: ").strip()
+def sing_up():
+    try:
+        print("\n===== SIGN UP =====\n")
+        username = input("Type your Username: ").strip()
+        email = input("Type your Email: ").strip()
 
-        if user == account["user"] and password == account["password"]:
-            print(f"Welcome {account['user']}!")
+        # [Verify Validated Email]
+        try:
+            validado = validate_email(email)
+            email = validado.normalized
+        except EmailNotValidError as e:
+            print(f"Invalid Email: {e}")
+            return 
+        
+        password = getpass.getpass("Type your Password: ").strip()
 
-            analyze_data = input("Analyze my data [Y/n]: ").strip().upper()
+        # [Password Encrypted]
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-            if analyze_data == "Y":
-                password = getpass.getpass("Enter your password: ").strip()
+        cursor.execute("""
+        INSERT INTO users
+        (username, email, password, created_at)
+        VALUES (?, ?, ?, ?)""", (username, email, password_hash, readable_string))
 
-                if password == account["password"]:
-                    print("My data:")
-                    print(f"User: {account['user']}")
-                    print(f"Password: {account['password']}")
-                    break
+        connection.commit()
+        print("User registered successfully!")
+        
+    except Exception as e:
+        print(f"Error! {e}")
+        
+    finally:
+        cursor.close()
 
-                else:
-                    print("Error! Your password are incorrect")
+while True:
+    print("\n===== SYSTEM LOGIN ====\n")
+    print("[1] Sign up")
+    print("[2] Login")
+    print("[3] Exit")
+    opc = int(input("\nWhich one do you want? R: \n"))
 
-            else:
-                print(f"Welcome {account['user']}!")
-                break
-
-        else:
-            print("Error! Your email or password are incorrect")
-            print(f"Your have {number_attempts} attempts")
-            number_attempts -= 1
-
-            if number_attempts == -1:
-                break
-
-elif opc == 2:
-    print("Bye!")
-    exit()
+    if opc == 1:
+        sing_up()
