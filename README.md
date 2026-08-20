@@ -6,5 +6,6 @@ Reviewing Python concepts and applying **back-end** practices.
 **Futures Implementations:**
 
 - Account locked after incorrect attempts
+- Session Management
 - Deploy -> **Docker**
 
